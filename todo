@@ -1,0 +1,16 @@
+"""
+TODO: 
+PAPPA AND CARRY OUT:
+    LOW SCOPE 
+    DE-MYSTIFY
+
+NewLine 
+Comments
+
+Make A Proper parseResult object
+Make a proper nodal constructor instead of doing it in parser --> Outsource it to Hydrocarbons class maybe idk
+Simplify Hydrogen counting 
+Simplify Node Making
+Check and reimplement illegalTerminalError
+Cascading Unsat
+"""
