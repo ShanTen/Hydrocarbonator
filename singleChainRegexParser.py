@@ -13,6 +13,26 @@ import re
 #################################################
 
 ##########################################################################################
+#Constants
+##########################################################################################
+
+#NOTE: used based off number of double bonds and triple bonds
+IUPACmultipliers = {
+    1  : "", #mono
+    2  : "di", 
+    3  : "tri", 
+    4  : "tetra", 
+    5  : "penta", 
+    6  : "hexa", 
+    7  : "hepta", 
+    8  : "octa", 
+    9  : "nona", 
+    10 : "deca", 
+    11 : "undeca", 
+    12 : "dodeca"
+}
+
+##########################################################################################
 #Error Sub Classes
 ##########################################################################################
 
@@ -27,8 +47,75 @@ class IllegalNodeError(ErrorClass):
 #TODO: Working on diene class
 #NOTE: CH3​−CH=CH−C#CH => Pent-3-en-1-yne
 #NOTE: CH#C-CH2-CH=CH-CH3 => Hex-4-ene-1-yne
-class DieneChain:
-    pass
+class NameClass:
+    def __init__(self, parseObj):
+        self.parseObj = parseObj
+        self.satType = None
+        self.satOrder = None
+        self.rev = False
+        self.name = ''
+
+
+    def nameChain(self): #Identify if Alkane, Alkene, Alkyne
+        bondsArr = self.parseObj["BondArr"]
+        get_indexes = lambda __lst,__item : [__i for __i, __x in enumerate(__lst) if __x == __item]
+        global IUPACmultipliers
+
+        tripleBondCount = 0
+        trplBondIndexes = []
+
+        doubleBondCount = 0
+        dblBondIndexes = []
+
+        if "TripleBond" in bondsArr:
+            self.satType = "Alkyne"
+            trplBondIndexes = get_indexes(bondsArr,"TripleBond")
+            if (trplBondIndexes[0]) > (self.parseObj["CarbonCount"]-trplBondIndexes[0]):
+                bondsArr = bondsArr[::-1]
+                self.rev = True
+                trplBondIndexes = get_indexes(bondsArr,"TripleBond")
+            tripleBondCount = bondsArr.count("TripleBond")            
+
+        if "DoubleBond" in bondsArr:
+
+            if tripleBondCount == 0:
+                self.satType = "Alkene"
+                dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
+                if (dblBondIndexes[0]) > (self.parseObj["CarbonCount"]-dblBondIndexes[0]):
+                    bondsArr = bondsArr[::-1]
+                    self.rev = True
+                doubleBondCount = bondsArr.count("DoubleBond")
+
+            else:
+                #NOTE: arr alr reversed from triple bond if needed
+                dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
+                doubleBondCount = bondsArr.count("DoubleBond")
+
+        if self.satType not in ["Alkene","Alkyne"]:
+            self.satType = "Alkane"
+
+        if self.satType == "Alkane":
+            self.name = f"n-{self.parseObj['ChainLengthDenotation']}{self.satType[-3:]}" #NOTE: Adding "ane" to the name 
+
+        dblBondIndexes = [di+1 for di in dblBondIndexes]
+
+        if self.satType == "Alkene":
+            _len = doubleBondCount
+            self.name = f"{self.parseObj['ChainLengthDenotation']}-{dblBondIndexes}-{IUPACmultipliers[_len]}{self.satType[-3:]}"#NOTE: Adding "ene" or "yne" to the name 
+
+        trplBondIndexes = [ti+1 for ti in trplBondIndexes]
+
+        if self.satType == "Alkyne":
+            _len = tripleBondCount
+            if doubleBondCount == 0:
+                self.name =  f"{self.parseObj['ChainLengthDenotation']}-{trplBondIndexes}-{IUPACmultipliers[_len]}{self.satType[-3:]}" #NOTE: Adding "ene" or "yne" to the name 
+            else:
+                d_len = doubleBondCount
+                self.name =  f"{self.parseObj['ChainLengthDenotation']}-{dblBondIndexes}-{IUPACmultipliers[d_len]}ene-{trplBondIndexes}-{IUPACmultipliers[_len]}{self.satType[-3:]}" #NOTE: Adding "ene" or "yne" to the name 
+
+        return
+
+
 
 ##########################################################################################
 #Simple Node Class
@@ -43,9 +130,32 @@ class SimpleNode: #work back on this later
         self.prevBond = prevBond #singleDoubletripleNone
         self.nextBond = nextBond #singleDoubletripleNone
 
-    def validateNode(self):
+    def isValidNode(self):
         #NOTE: Based off attributes 
-        pass
+        #TODO: Validate end value of each node 
+        carbonComp = 4
+        hydrogenComp = -1 
+        pbv = 0
+        nbv = 0
+        valDict = {
+            "SingleBond":-1,
+            "DoubleBond":-2,
+            "TripleBond":-3
+        }
+        if self.prevBond != None:
+            pbv = valDict[self.prevBond]
+        if self.nextBond != None:
+            nbv = valDict[self.nextBond]
+
+        nodeSum = carbonComp + (self.hydrogenCount*hydrogenComp) + (nbv+pbv)
+
+        if nodeSum < 0:
+            return False, f"Too Many Hydrogen Atoms! ({self.hydrogenCount} atoms)"
+        
+        if nodeSum > 0:
+            return False, f"Too Few Hydrogen Atoms! ({self.hydrogenCount} atoms)"
+
+        return True, ""
 
     def __repr__(self):
         brp, brn = self.prevBond,self.nextBond #NOTE: Bond rep prev, bond rep next
@@ -72,9 +182,6 @@ class RegexParser:
             return
 
         self.tokens = [tok.value for tok in tokensArr]
-        
-    def closestUnsat(self):
-        pass
 
     def evaluate(self):
 
@@ -166,6 +273,14 @@ class RegexParser:
             nodeIndex = ni
             p, n = prevNextBonds[nodeIndex]
             newNode = SimpleNode(carbonCount,hydrogenCount,p,n) #TODO: Validate node    
+
+            nodeIsValid, msg = newNode.isValidNode()
+
+            if nodeIsValid:
+                continue
+            else:
+                return '',IllegalNodeError(f"Node {newNode} is not a valid combination; {msg}")
+
             parseResult["HydrogenCount"] += hydrogenCount
             parseResult["Nodes"].append(newNode)
 
@@ -176,7 +291,11 @@ class RegexParser:
         parseResult["BondArr"] = bondsArr #NOTE: All bonds are to the RIGHT of the respective nodes
         parseResult["ChainLengthDenotation"] = list(TknNums.keys())[parseResult["CarbonCount"]-1]
 
-        return parseResult, None #TODO: Actually Name the compound using the diene class
+
+        rez = NameClass(parseResult)
+        rez.nameChain()
+
+        return rez.name, None #TODO: Actually Name the compound using the diene class
         # return f"{parseResult['ChainLengthDenotation']}", None 
 
 ##########################################################################################
@@ -192,6 +311,8 @@ def runParser(inputChain):
 
     prsr = RegexParser(tkns)
     prsr_res, prsr_err = prsr.evaluate()
+
+    
 
     if(prsr_err): return '', prsr_err
 
