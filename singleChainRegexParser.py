@@ -1,5 +1,5 @@
-from singleChainv2 import passTokens, TknNums, Lexer, Tkn_Carbon, Tkn_Hydrogen, TknBonds #Im not not making a parser again from scratch
-from ErrorClass import ErrorClass #Ifstg if the import is the error
+from singleChainv2 import IllegalChainError, IllegalTerminalError, passTokens, TknNums, Lexer, Tkn_Carbon, Tkn_Hydrogen, TknBonds #Im not not making a parser again from scratch
+from ErrorClass import * #Ifstg if the import is the error
 import re
 
 #################################################
@@ -119,6 +119,11 @@ class RegexParser:
 
             shouldCountH = True #In case of C only in a node
             _i = 0 #Hack-ish solution #NOTE: Incase of reversal errors check here
+
+            if node == '': #NOTE: for trailing bonds Ex: CH3=CH3= <- bad!
+                errCompound = ''
+                _kekw = errCompound.join(self.tokens).replace("SingleBond",TknBonds["SingleBond"]).replace("DoubleBond",TknBonds["DoubleBond"]).replace("TripleBond",TknBonds["TripleBond"]) #LMAOOOOO
+                return '',IllegalChainError(f"Chain cannot end with a trailing bond; -> '{_kekw}' ends with -> '{TknBonds[bondsArr[-1]]}'")
 
             #NOTE: Node follows: CHn or CH*n; 
             if node[0] != Tkn_Carbon:#Positional 
