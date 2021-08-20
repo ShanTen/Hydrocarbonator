@@ -18,13 +18,15 @@ import re
 
 class IllegalNodeError(ErrorClass):
     def __init__(self,_errMsg):
-        super().__init__("Illegal Character Error",_errMsg)
+        super().__init__("Illegal Node Error",_errMsg)
 
 ##########################################################################################
 #Diene Chain (Identification Class)
 ##########################################################################################
 
 #TODO: Working on diene class
+#NOTE: CH3​−CH=CH−C#CH => Pent-3-en-1-yne
+#NOTE: CH#C-CH2-CH=CH-CH3 => Hex-4-ene-1-yne
 class DieneChain:
     pass
 
@@ -116,26 +118,32 @@ class RegexParser:
         #NOTE: These are checks before Hydrogen Parsing
 
             shouldCountH = True #In case of C only in a node
+            _i = 0 #Hack-ish solution #NOTE: Incase of reversal errors check here
 
             #NOTE: Node follows: CHn or CH*n; 
             if node[0] != Tkn_Carbon:#Positional 
-                return '',IllegalNodeError("Illegal node error: Node must start with Carbon")
+                return '',IllegalNodeError("Node must start with Carbon")
 
             if len(node) == 1:
                 shouldCountH = False
             
             if shouldCountH and node[1] != Tkn_Hydrogen:
                 if node[1].isnumeric():
-                    return '',IllegalNodeError(f"Illegal node error: Number of carbon atoms per node can only be 1\nHere it is -->{node[1]}")
+                    node_unit = int(node[1])
+                    if node_unit > 1 or node_unit == 0: 
+                        return '',IllegalNodeError(f"Number of carbon atoms per node can only be 1; Here it is --> {node[1]}")
+                    if node_unit == 1:
+                        _i = 1 #nICe hAcK vRo 
+                    
 
             #Numeric/Count Based
             if carbonCount > 1:
-                return '',IllegalNodeError(f"Illegal node error: Maximum number of Carbon atoms per node can only be 1\nHere it is -->{carbonCount}")
+                return '',IllegalNodeError(f"Maximum number of Carbon atoms per node can only be 1; Here it is --> {carbonCount}")
 
         ##############################################################################
         #NOTE: Hydrogen Parsing from here
             if shouldCountH:
-                hydrogenAtoms = node[1:] #NOTE:Removing the Carbon nodes since its CHn | CH*n
+                hydrogenAtoms = node[1+_i:] #NOTE:Removing the Carbon nodes since its CHn | CH*n
 
                 for i in range(len(hydrogenAtoms)):
                     unit = hydrogenAtoms[i]
@@ -146,7 +154,7 @@ class RegexParser:
                         hydrogenCount += int(unit) - 1 
 
                 if hydrogenCount > 4:
-                    return '',IllegalNodeError(f"Illegal node error: Maximum number of Hydrogen atoms per node can only be 4 (Methane)\nHere it is -->{hydrogenCount}")
+                    return '',IllegalNodeError(f"Maximum number of Hydrogen atoms per node can only be 4 (Methane); Here it is --> {hydrogenCount}")
 
         ##############################################################################
         #NOTE: SimpleNode making starts here

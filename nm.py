@@ -63,7 +63,7 @@ def handleNonPNomen(cmdString):
 
 
 while 1:
-	text = input("NM >> ")
+	text = input("NM => ")
 
 	if text in commands:
 		handleNonPNomen(text)
@@ -87,7 +87,7 @@ while 1:
 		#otherwise, we give an easy option to type a # as input instead of the more difficult unicode char
 		cFormula = condensedFormula.replace('#',"≡",condensedFormula.count('#'))
 
-		# IUPACName, err = runNMEngine(cFormula)
+		#IUPACName, err = runNMEngine(cFormula)
 		IUPACName, err = runParser(cFormula) 
 
 		if err: 
