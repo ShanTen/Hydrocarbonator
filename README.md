@@ -11,11 +11,13 @@ Reason being that the underlying code got too yucky before I could realistically
 the naming depends only element count data (identified from the chain) rather than pattern which is the end goal.
 
 TODO:
-+ A *better* parseResult object
-+ *Simplify* Hydrogen counting
-+ *Simplify* Node Making
-+ Figure out hierarchy to get Cascading Unsaturation Naming
-+ regex-ify this at some point. [100% sure this'll solve the entire issue in like 1 file lol]
++ ~~A *better* parseResult object~~
++ ~~*Simplify* Hydrogen counting~~
++ ~~*Simplify* Node Making~~
++ ~~Figure out hierarchy to get Cascading Unsaturation Naming~~
++ ~~regex-ify~~ 
++ Add Caching with a db
++ Add Massive List of Examples
 
 Result:
 
