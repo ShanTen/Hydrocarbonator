@@ -10,7 +10,7 @@ NMSettings = {
 	"DefaultTBDDisplayChar": '≡', # Fixed by engine; do not allow edit
 	"TripleBondDisplayCharacter": '≡', # similar looking: SAFE: '~' ASCII: "÷" '#' '≈' '£' '¥' 'ε' UNICODE: '≡'
 	"UseHashForTripleBonds": False,
-	"CommentChar":"'"	
+	"CommentChar":"//"	
 }
 
 HelpText = """Type an condensed organic formula and press enter
@@ -20,14 +20,14 @@ HelpText = """Type an condensed organic formula and press enter
 	equals (=) for double bond and 
 	hash symbol (#) for triple bonds
  
- The Nomenclature machine internally uses ≡ for triple bond, and if you can manage to type it, that is ok too.
+ The Hydrocarbonator internally uses ≡ for triple bond, and if you can manage to type it, that is ok too.
  
  Some example formulae that you could try out..
 	CH3-CH3
 	CH2=CH2
 	CH#CH
 	CH3-CH2-C#CH
-	"""
+"""
 
 commands = ['clear','cls','exit','quit','settings','config','help','?']
 

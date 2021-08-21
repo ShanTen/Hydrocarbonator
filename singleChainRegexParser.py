@@ -1,5 +1,5 @@
 from singleChainv2 import IllegalChainError, IllegalTerminalError, passTokens, TknNums, Lexer, Tkn_Carbon, Tkn_Hydrogen, TknBonds #Im not not making a parser again from scratch
-from ErrorClass import * #Ifstg if the import is the error
+from ErrorClass import * 
 import re
 
 #################################################
@@ -21,15 +21,23 @@ IUPACmultipliers = {
     1  : "", #mono
     2  : "di", 
     3  : "tri", 
-    4  : "tetra", 
-    5  : "penta", 
-    6  : "hexa", 
-    7  : "hepta", 
-    8  : "octa", 
-    9  : "nona", 
-    10 : "deca", 
-    11 : "undeca", 
-    12 : "dodeca"
+    4  : "tetr", 
+    5  : "pent", 
+    6  : "hex", 
+    7  : "hept", 
+    8  : "oct", 
+    9  : "non", 
+    10 : "dec", 
+    11 : "undec", 
+    12 : "dodec",
+    13 :"tridec",
+    14 :"tetradec",
+    15 :"pentadec",
+    16 :"hexadec",
+    17 :"heptadec",
+    18 :"octadec",
+    19 :"nonadec",
+    20 :"icosa"
 }
 
 ##########################################################################################
@@ -44,9 +52,6 @@ class IllegalNodeError(ErrorClass):
 #Diene Chain (Identification Class)
 ##########################################################################################
 
-#TODO: Working on diene class
-#NOTE: CH3​−CH=CH−C#CH => Pent-3-en-1-yne
-#NOTE: CH#C-CH2-CH=CH-CH3 => Hex-4-ene-1-yne
 class NameClass:
     def __init__(self, parseObj):
         self.parseObj = parseObj
@@ -95,7 +100,11 @@ class NameClass:
             self.satType = "Alkane"
 
         if self.satType == "Alkane":
-            self.name = f"n-{self.parseObj['ChainLengthDenotation']}{self.satType[-3:]}" #NOTE: Adding "ane" to the name 
+            nFix = ''
+            if self.parseObj["CarbonCount"] > 2:
+                nFix = "n-"
+
+            self.name = f"{nFix}{self.parseObj['ChainLengthDenotation']}{self.satType[-3:]}" #NOTE: Adding "ane" to the name 
 
         dblBondIndexes = [di+1 for di in dblBondIndexes]
 
@@ -115,8 +124,6 @@ class NameClass:
 
         return
 
-
-
 ##########################################################################################
 #Simple Node Class
 ##########################################################################################
@@ -132,7 +139,6 @@ class SimpleNode: #work back on this later
 
     def isValidNode(self):
         #NOTE: Based off attributes 
-        #TODO: Validate end value of each node 
         carbonComp = 4
         hydrogenComp = -1 
         pbv = 0
@@ -208,13 +214,13 @@ class RegexParser:
         }
 
         #NOTE: These nodes do not implicitly parse single bonds anymore like they did in SC1 and SC2 so you NEED to specify them
-        nodes = re.split(r'SingleBond|DoubleBond|TripleBond', "".join(self.tokens)) #TODO: parse as CH* till bond then verify node 
+        nodes = re.split(r'SingleBond|DoubleBond|TripleBond', "".join(self.tokens)) 
         bondsArr = re.findall(r'(?:SingleBond|DoubleBond|TripleBond)', "".join(self.tokens))
         prevNextBonds = generatePrevBondNextBond(bondsArr)
 
         ##############################################################################
         #NOTE: Node Handling Starts here all blocks following respec fall under node-handling
-        for ni in range(len(nodes)): #TODO: Making this int based loop rather than obj based
+        for ni in range(len(nodes)): 
             
             node = nodes[ni]
 
@@ -272,7 +278,7 @@ class RegexParser:
         #NOTE: SimpleNode making starts here
             nodeIndex = ni
             p, n = prevNextBonds[nodeIndex]
-            newNode = SimpleNode(carbonCount,hydrogenCount,p,n) #TODO: Validate node    
+            newNode = SimpleNode(carbonCount,hydrogenCount,p,n) 
 
             nodeIsValid, msg = newNode.isValidNode()
 
@@ -291,12 +297,16 @@ class RegexParser:
         parseResult["BondArr"] = bondsArr #NOTE: All bonds are to the RIGHT of the respective nodes
         parseResult["ChainLengthDenotation"] = list(TknNums.keys())[parseResult["CarbonCount"]-1]
 
+        max_chain_len = 20
+        if parseResult["CarbonCount"] > max_chain_len:
+            return '',IllegalChainError(f"Chain is too long ({parseResult['CarbonCount']} nodes)! Max length is {max_chain_len}")
+
+
 
         rez = NameClass(parseResult)
         rez.nameChain()
 
-        return rez.name, None #TODO: Actually Name the compound using the diene class
-        # return f"{parseResult['ChainLengthDenotation']}", None 
+        return rez.name, None 
 
 ##########################################################################################
 #Final Exported Method to interface (nm.py)
@@ -311,8 +321,6 @@ def runParser(inputChain):
 
     prsr = RegexParser(tkns)
     prsr_res, prsr_err = prsr.evaluate()
-
-    
 
     if(prsr_err): return '', prsr_err
 

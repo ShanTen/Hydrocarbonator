@@ -38,7 +38,14 @@ TknNums = {
     "Dec":10,
     "UnDec":11,
     "DoDec":12,
-    "TriDec":13
+    "TriDec":13,
+    "tetradec": 14,	
+    "pentadec":15,
+    "hexadec": 16,
+    "heptadec": 17,
+    "octadec": 18,
+    "nonadec": 19,
+    "icos": 20  
 }
 
 class Token:
