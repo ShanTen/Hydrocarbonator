@@ -6,10 +6,7 @@ Motivation:
   The reason for it being boiled all the way to single chain is because I still haven't thought of a way to make it able to detect and identify double cyclic or stacked compounds.
   Also I seriously needed to limit the scope for this if I wanted it to be finished by a certain deadline.
   
-**NOTE** : Current Version **Only** detects and names single chain *Pure* Hydrocarbons (Not Dienes (;-;)) [Alkanes, Alkenes, Alkynes].
-Reason being that the underlying code got too yucky before I could realistically build on it and the identification class is something to work on. As for now
-the naming depends only element count data (identified from the chain) rather than pattern which is the end goal.
-
+**NOTE** : Current Version (SCV3) **Only** detects and names pure hydrocarbons and not any functional groups.
 TODO:
 + ~~A *better* parseResult object~~
 + ~~*Simplify* Hydrogen counting~~
