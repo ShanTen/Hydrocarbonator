@@ -4,7 +4,7 @@ import re
 
 #################################################
 # Goal: 
-#    Implemnt SV2 in RegexParser -- done
+#    sImplement SV2 in RegexParser -- done
 #    Implement Node Array -- done 
 
 #Shantanu's Convention
@@ -79,6 +79,7 @@ class NameClass:
                 bondsArr = bondsArr[::-1]
                 self.rev = True
                 trplBondIndexes = get_indexes(bondsArr,"TripleBond")
+
             tripleBondCount = bondsArr.count("TripleBond")            
 
         if "DoubleBond" in bondsArr:
@@ -86,9 +87,12 @@ class NameClass:
             if tripleBondCount == 0:
                 self.satType = "Alkene"
                 dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
+
                 if (dblBondIndexes[0]) > (self.parseObj["CarbonCount"]-dblBondIndexes[0]):
                     bondsArr = bondsArr[::-1]
                     self.rev = True
+                    dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
+
                 doubleBondCount = bondsArr.count("DoubleBond")
 
             else:
@@ -327,7 +331,7 @@ def runParser(inputChain):
     return prsr_res, None
 
 ##########################################################################################
-#Testing Funtions
+#Testing Functions
 ##########################################################################################
 
 def test_ch(node):
