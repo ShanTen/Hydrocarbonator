@@ -69,8 +69,6 @@ class NameClass:
 
     def nameChain(self): #Identify if Alkane, Alkene, Alkyne
 
-        chainDebugger.print("test")
-
         bondsArr = self.parseObj["BondArr"]
         get_indexes = lambda __lst,__item : [__i for __i, __x in enumerate(__lst) if __x == __item]
         global IUPACmultipliers
@@ -81,10 +79,12 @@ class NameClass:
         doubleBondCount = 0
         dblBondIndexes = []
 
+        totalBondsCount = self.parseObj["CarbonCount"]-1
+
         if "TripleBond" in bondsArr:
             self.satType = "Alkyne"
             trplBondIndexes = get_indexes(bondsArr,"TripleBond")
-            if (trplBondIndexes[0]) > (self.parseObj["CarbonCount"]-trplBondIndexes[0]):
+            if (trplBondIndexes[0]) > (totalBondsCount-trplBondIndexes[0]):
                 bondsArr = bondsArr[::-1]
                 self.rev = True
                 trplBondIndexes = get_indexes(bondsArr,"TripleBond")
@@ -93,16 +93,20 @@ class NameClass:
 
         if "DoubleBond" in bondsArr:
 
+            chainDebugger.print(f"Bond Arr: {bondsArr}")
+
             if tripleBondCount == 0:
                 self.satType = "Alkene"
                 dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
-                
 
-                chainDebugger.print(dblBondIndexes[0])
-                chainDebugger.print(self.parseObj["CarbonCount"]-dblBondIndexes[0])
-                chainDebugger.print(self.parseObj)
+                __rl = totalBondsCount-dblBondIndexes[0]
+                chainDebugger.print(f"LEFT DBL BOND INDEX: {dblBondIndexes[0]}")
+                chainDebugger.print(f"RIGHT DBL BOND INDEX: {__rl}")
+                chainDebugger.print(f"Parse Object: {self.parseObj}")
 
-                if (dblBondIndexes[0]) > (self.parseObj["CarbonCount"]-dblBondIndexes[0]):
+                # self.parseObj["CarbonCount"]-1
+
+                if (dblBondIndexes[0]) > (totalBondsCount-dblBondIndexes[0]):
                     bondsArr = bondsArr[::-1]
                     self.rev = True
                     dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
