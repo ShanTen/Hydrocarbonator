@@ -41,6 +41,8 @@ IUPACmultipliers = {
     20 :"icosa"
 }
 
+max_chain_len = 20
+
 ##########################################################################################
 #Error Sub Classes
 ##########################################################################################
@@ -103,8 +105,6 @@ class NameClass:
                 chainDebugger.print(f"LEFT DBL BOND INDEX: {dblBondIndexes[0]}")
                 chainDebugger.print(f"RIGHT DBL BOND INDEX: {__rl}")
                 chainDebugger.print(f"Parse Object: {self.parseObj}")
-
-                # self.parseObj["CarbonCount"]-1
 
                 if (dblBondIndexes[0]) > (totalBondsCount-dblBondIndexes[0]):
                     bondsArr = bondsArr[::-1]
@@ -201,6 +201,9 @@ class SimpleNode: #work back on this later
 ##########################################################################################
 
 class RegexParser:
+
+    global max_chain_len
+
     def __init__(self,tokensArr):
         self.NullLine = False
         self.rawTokens = tokensArr
@@ -240,12 +243,13 @@ class RegexParser:
         bondsArr = re.findall(r'(?:SingleBond|DoubleBond|TripleBond)', "".join(self.tokens))
         prevNextBonds = generatePrevBondNextBond(bondsArr)
 
+        if len(nodes) > max_chain_len:
+            return '', IllegalChainError(f"Max Chain Length is {max_chain_len}, given chain has {len(nodes)} nodes.")
+
         ##############################################################################
         #NOTE: Node Handling Starts here all blocks following respec fall under node-handling
         for ni in range(len(nodes)): 
-            
             node = nodes[ni]
-
             hydrogenCount = 0
             carbonCount = node.count(Tkn_Carbon)
 
@@ -318,12 +322,6 @@ class RegexParser:
         parseResult["EachNodePrevBondNextBond"] = prevNextBonds
         parseResult["BondArr"] = bondsArr #NOTE: All bonds are to the RIGHT of the respective nodes
         parseResult["ChainLengthDenotation"] = list(TknNums.keys())[parseResult["CarbonCount"]-1]
-
-        max_chain_len = 20
-        if parseResult["CarbonCount"] > max_chain_len:
-            return '',IllegalChainError(f"Chain is too long ({parseResult['CarbonCount']} nodes)! Max length is {max_chain_len}")
-
-
 
         rez = NameClass(parseResult)
         rez.nameChain()
