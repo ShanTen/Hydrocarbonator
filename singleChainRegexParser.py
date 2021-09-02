@@ -1,5 +1,6 @@
 from singleChainv2 import IllegalChainError, IllegalTerminalError, passTokens, TknNums, Lexer, Tkn_Carbon, Tkn_Hydrogen, TknBonds #Im not not making a parser again from scratch
 from ErrorClass import * 
+from Bugger import Bugger
 import re
 
 #################################################
@@ -52,7 +53,12 @@ class IllegalNodeError(ErrorClass):
 #Diene Chain (Identification Class)
 ##########################################################################################
 
+chainDebugger = Bugger()
+
 class NameClass:
+
+    global chainDebugger
+
     def __init__(self, parseObj):
         self.parseObj = parseObj
         self.satType = None
@@ -62,6 +68,9 @@ class NameClass:
 
 
     def nameChain(self): #Identify if Alkane, Alkene, Alkyne
+
+        chainDebugger.print("test")
+
         bondsArr = self.parseObj["BondArr"]
         get_indexes = lambda __lst,__item : [__i for __i, __x in enumerate(__lst) if __x == __item]
         global IUPACmultipliers
@@ -87,6 +96,11 @@ class NameClass:
             if tripleBondCount == 0:
                 self.satType = "Alkene"
                 dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
+                
+
+                chainDebugger.print(dblBondIndexes[0])
+                chainDebugger.print(self.parseObj["CarbonCount"]-dblBondIndexes[0])
+                chainDebugger.print(self.parseObj)
 
                 if (dblBondIndexes[0]) > (self.parseObj["CarbonCount"]-dblBondIndexes[0]):
                     bondsArr = bondsArr[::-1]
@@ -316,7 +330,12 @@ class RegexParser:
 #Final Exported Method to interface (nm.py)
 ##########################################################################################
 
-def runParser(inputChain):
+def runParser(inputChain,debugging=False):
+
+    if debugging == True: #Shove all Bugger Objects here
+        chainDebugger.activate()
+    else: 
+        chainDebugger.deactivate()
 
     lxr = Lexer(inputChain)
     tkns,_err = lxr.makeTokens()

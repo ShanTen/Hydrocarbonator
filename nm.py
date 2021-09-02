@@ -1,8 +1,19 @@
+##########################################################################################
+#Imports
+##########################################################################################
+
 from singleChainv2 import runNMEngine
 from singleChainRegexParser import runParser
 
+from Bugger import Bugger 
+metaBugger = Bugger(False) #Can change this to true for meta runs
+
 from os import system
 from os import name as OSName
+
+##########################################################################################
+#Declrations
+##########################################################################################
 
 NMSettings = {	
     "EchoInput": True,
@@ -10,7 +21,8 @@ NMSettings = {
 	"DefaultTBDDisplayChar": '≡', # Fixed by engine; do not allow edit
 	"TripleBondDisplayCharacter": '≡', # similar looking: SAFE: '~' ASCII: "÷" '#' '≈' '£' '¥' 'ε' UNICODE: '≡'
 	"UseHashForTripleBonds": False,
-	"CommentChar":"//"	
+	"CommentChar":"//",
+	"Debugging":False
 }
 
 HelpText = """Type an condensed organic formula and press enter
@@ -29,22 +41,21 @@ HelpText = """Type an condensed organic formula and press enter
 	CH3-CH2-C#CH
 """
 
-commands = ['clear','cls','exit','quit','settings','config','help','?']
+commands = ['cmds','commands','clear','cls','exit','quit','settings','config','help','?','dbg-toggle']
+
+##########################################################################################
+#Command Handling Method Definition
+##########################################################################################
 
 def printIUPACResults(condensedFormula, comment, IUPACName):
 	tbdDisplayChar = NMSettings["TripleBondDisplayCharacter"]
 	tbdDefaultChar = NMSettings["DefaultTBDDisplayChar"]
-	cCount = condensedFormula.count(tbdDefaultChar)
-	#print(f"DBG: BEFORE {condensedFormula} count{cCount} occurances dispChar {tbdDisplayChar}")
 	cFormula = condensedFormula.replace(tbdDefaultChar,tbdDisplayChar)
-	#print(f"DBG: AFTER{cFormula}")
 	
 	if(NMSettings["EchoInput"]):	
 		print(f"{cFormula} = {IUPACName} {comment}")
 	else:
 		print(f"{IUPACName} {comment}")
-
-
 
 def handleNonPNomen(cmdString):
 	cmdString = cmdString.lower()	
@@ -58,9 +69,21 @@ def handleNonPNomen(cmdString):
 	if cmdString in ['help', '?']:
 		print(HelpText)
 		
-	if (cmdString) in ['settings','config']:
+	if cmdString in ['settings','config']:
 		print(NMSettings)
 
+	if cmdString in ['cmds','commands']:
+		print(f"The available commands are: {commands}")
+
+	if cmdString in ['dbg-toggle']:
+		__ds = NMSettings['Debugging']
+		print(f"Current Debug State is: {__ds} ")
+		print(f"Setting it to: {not __ds} ")
+		NMSettings['Debugging'] = not __ds
+
+##########################################################################################
+#Main
+##########################################################################################
 
 while 1:
 	text = input("NM => ")
@@ -82,13 +105,12 @@ while 1:
 			comment = text[text.index(commentChar)::]
 			condensedFormula = text[:text.index(commentChar)]
 
-		#we have built the unicode char '≡' to reprresent triple bonds in our parser
-		#however the unicode character is hard to type, but if the user managed to type it , it is ok
+		#we have built the unicode char '≡' to represent triple bonds in our parser
+		#however the unicode character is hard to type, but if the user managed to type it, it is ok
 		#otherwise, we give an easy option to type a # as input instead of the more difficult unicode char
 		cFormula = condensedFormula.replace('#',"≡",condensedFormula.count('#'))
-
-		#IUPACName, err = runNMEngine(cFormula)
-		IUPACName, err = runParser(cFormula) 
+		metaBugger.log(f"Debugging State of nm engine is {NMSettings['Debugging']}")
+		IUPACName, err = runParser(cFormula,NMSettings['Debugging'])
 
 		if err: 
 			print(err.stringify())
