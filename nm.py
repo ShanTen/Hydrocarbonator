@@ -77,8 +77,8 @@ def handleNonPNomen(cmdString):
 
 	if cmdString in ['dbg-toggle']:
 		__ds = NMSettings['Debugging']
-		print(f"Current Debug State is: {__ds} ")
-		print(f"Setting it to: {not __ds} ")
+		print(f"Current Debug State is {__ds} ")
+		print(f"Setting it to {not __ds} ")
 		NMSettings['Debugging'] = not __ds
 
 ##########################################################################################
