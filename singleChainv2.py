@@ -107,7 +107,6 @@ class Lexer: #End Result should be TokenArr(If any) and Error (If Any)
                 _error = IllegalCharacterError(f"Illegal Character --> '{_char_}'")
                 return [],_error
     
-
     #CHANGE TO TYPE BASED
         if tokens == []:
             return "NULL_LINE",None

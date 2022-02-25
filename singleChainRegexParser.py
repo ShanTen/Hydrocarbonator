@@ -1,13 +1,8 @@
-from singleChainv2 import IllegalChainError, IllegalTerminalError, passTokens, TknNums, Lexer, Tkn_Carbon, Tkn_Hydrogen, TknBonds #Im not not making a parser again from scratch
 from ErrorClass import * 
 from Bugger import Bugger
 import re
 
 #################################################
-# Goal: 
-#    sImplement SV2 in RegexParser -- done
-#    Implement Node Array -- done 
-
 #Shantanu's Convention
 #NOTE: for notes
 #TODO: For inline features to add
@@ -16,6 +11,45 @@ import re
 ##########################################################################################
 #Constants
 ##########################################################################################
+
+TknBonds = {
+    "SingleBond":"-",
+    "DoubleBond":"=",
+    "TripleBond":"≡"
+}
+
+Tkn_Carbon = "C"
+Tkn_Hydrogen = "H"
+
+TknElements = [Tkn_Carbon,Tkn_Hydrogen] #NOTE:Change this to elemental class later + dont do raw entry 
+
+#Types of Values in this code 
+TknTypeBond = "BOND"
+TknTypeElement = "ELEMENT_NODE"
+TknTypeElementCount = "ELEMENT_COUNT"
+
+TknNums = {
+    "Meth":1,
+    "Eth":2,
+    "Prop":3,
+    "But":4,
+    "Pent":5,
+    "Hex":6,
+    "Hept":7,
+    "Oct":8,
+    "Non":9,
+    "Dec":10,
+    "UnDec":11,
+    "DoDec":12,
+    "TriDec":13,
+    "tetradec": 14,	
+    "pentadec":15,
+    "hexadec": 16,
+    "heptadec": 17,
+    "octadec": 18,
+    "nonadec": 19,
+    "icos": 20  
+}
 
 #NOTE: used based off number of double bonds and triple bonds
 IUPACmultipliers = {
@@ -46,13 +80,100 @@ max_chain_len = 20
 ##########################################################################################
 #Error Sub Classes
 ##########################################################################################
-
 class IllegalNodeError(ErrorClass):
     def __init__(self,_errMsg):
         super().__init__("Illegal Node Error",_errMsg)
 
+class IllegalCharacterError(ErrorClass):
+    def __init__(self,_errMsg):
+        super().__init__("Illegal Character Error",_errMsg)
+
+class IllegalTerminalError(ErrorClass):
+    def __init__(self,_terminalChar,_startOrEnd):
+        _errMsg = f"Illegal Character '{_terminalChar}' at {_startOrEnd} of chain. Terminal Character Must be a valid elemental node."
+        super().__init__("Illegal Terminal Error",_errMsg)
+
+class IllegalBondError(ErrorClass):
+    def __init__(self,_errMsg): #A bond can only follow an elemental carbon node and not another bond itself.
+        super().__init__("Illegal Bond Error",_errMsg)
+
+class IllegalChainError(ErrorClass):
+    def __init__(self,_errMsg):
+        super().__init__("Illegal Chain Error",_errMsg)
+
 ##########################################################################################
-#Diene Chain (Identification Class)
+#Lexer
+##########################################################################################
+class Token:
+    def __init__(self,_tknType,_tknVal,startPos=None,endPos=None):
+        self.type = _tknType
+        self.value = _tknVal
+    
+        if startPos:
+            self.startPos = startPos.copy()
+            self.endPos = startPos.copy()
+            self.endPos.advance()
+
+        if endPos:
+            self.endPos = endPos
+
+    def __repr__(self):
+        if self.value:
+            return f'{self.type}:{self.value}'
+        return f'{self.type}'
+
+class Lexer: #End Result should be TokenArr(If any) and Error (If Any)
+    def __init__(self,chain):
+        self.chain = chain
+        self.pos = -1
+        self.currentChar = None
+        self.advance()
+
+    def advance(self):
+        self.pos += 1
+
+        if self.pos < len(self.chain):
+            self.currentChar = self.chain[self.pos]
+        else:
+            self.currentChar = None
+
+    def makeTokens(self):
+        tokens = []
+
+        while self.currentChar != None: #While we have a character value in a chain
+            
+            if self.currentChar in ' \t':
+                self.advance()
+
+            elif self.currentChar in TknElements:
+                tokens.append(Token(TknTypeElement,self.currentChar))
+                self.advance()
+
+            elif self.currentChar.isnumeric() and int(self.currentChar != 0):
+                tokens.append(Token(TknTypeElementCount,self.currentChar))
+                self.advance()
+
+            elif self.currentChar in TknBonds.values():
+                tokens.append(Token(TknTypeBond,list(TknBonds.keys())[list(TknBonds.values()).index(self.currentChar)]))
+                self.advance()
+
+            else:#throw invalid character error
+                _char_ = self.currentChar
+                self.advance()
+                _error = IllegalCharacterError(f"Illegal Character --> '{_char_}'")
+                return [],_error
+    
+    #CHANGE TO TYPE BASED
+        if tokens == []:
+            return "NULL_LINE",None
+
+        if tokens[0].value not in TknElements: #NOTE:You should change this the tokens[0].type != TknTypeElement in later versions
+            return None,IllegalTerminalError(tokens[0],"start")
+
+        return tokens,None
+
+##########################################################################################
+#Naming Class
 ##########################################################################################
 
 chainDebugger = Bugger()
@@ -83,67 +204,53 @@ class NameClass:
 
         totalBondsCount = self.parseObj["CarbonCount"]-1
 
-        if "TripleBond" in bondsArr:
-            self.satType = "Alkyne"
-            trplBondIndexes = get_indexes(bondsArr,"TripleBond")
-            if (trplBondIndexes[0]) > (totalBondsCount-trplBondIndexes[0]):
-                bondsArr = bondsArr[::-1]
-                self.rev = True
-                trplBondIndexes = get_indexes(bondsArr,"TripleBond")
+        trplBondIndexes = get_indexes(bondsArr,"TripleBond")
+        dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
+        doubleBondCount = len(dblBondIndexes)
+        tripleBondCount = len(trplBondIndexes)
 
-            tripleBondCount = bondsArr.count("TripleBond")            
-
-        if "DoubleBond" in bondsArr:
-
-            chainDebugger.print(f"Bond Arr: {bondsArr}")
-
-            if tripleBondCount == 0:
-                self.satType = "Alkene"
-                dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
-
-                __rl = totalBondsCount-dblBondIndexes[0]
-                chainDebugger.print(f"LEFT DBL BOND INDEX: {dblBondIndexes[0]}")
-                chainDebugger.print(f"RIGHT DBL BOND INDEX: {__rl}")
-                chainDebugger.print(f"Parse Object: {self.parseObj}")
-
-                if (dblBondIndexes[0]) > (totalBondsCount-dblBondIndexes[0]):
-                    bondsArr = bondsArr[::-1]
-                    self.rev = True
-                    dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
-
-                doubleBondCount = bondsArr.count("DoubleBond")
-
-            else:
-                #NOTE: arr alr reversed from triple bond if needed
-                dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
-                doubleBondCount = bondsArr.count("DoubleBond")
-
-        if self.satType not in ["Alkene","Alkyne"]:
+#################################New Implementation#################################################
+        #Always pref to name dbl bonds 
+        self.name += f"{self.parseObj['ChainLengthDenotation']}"
+        if not dblBondIndexes and not trplBondIndexes:
             self.satType = "Alkane"
+            nfix = ""
+            if self.parseObj['CarbonCount'] > 3: nfix = "n-"
+            self.name = f"{nfix}{self.name}{self.satType[-3:]}"
 
-        if self.satType == "Alkane":
-            nFix = ''
-            if self.parseObj["CarbonCount"] > 2:
-                nFix = "n-"
-
-            self.name = f"{nFix}{self.parseObj['ChainLengthDenotation']}{self.satType[-3:]}" #NOTE: Adding "ane" to the name 
-
-        dblBondIndexes = [di+1 for di in dblBondIndexes]
-
-        if self.satType == "Alkene":
-            _len = doubleBondCount
-            self.name = f"{self.parseObj['ChainLengthDenotation']}-{dblBondIndexes}-{IUPACmultipliers[_len]}{self.satType[-3:]}"#NOTE: Adding "ene" or "yne" to the name 
-
-        trplBondIndexes = [ti+1 for ti in trplBondIndexes]
-
-        if self.satType == "Alkyne":
-            _len = tripleBondCount
-            if doubleBondCount == 0:
-                self.name =  f"{self.parseObj['ChainLengthDenotation']}-{trplBondIndexes}-{IUPACmultipliers[_len]}{self.satType[-3:]}" #NOTE: Adding "ene" or "yne" to the name 
+        if dblBondIndexes:
+            
+            self.satType = "Alkene"
+            dbl_reversed_indices = [len(bondsArr)-n for n in dblBondIndexes[::-1]]
+            dblBondIndexes = [di+1 for di in dblBondIndexes]
+            
+            if sum(dbl_reversed_indices) <= sum(dblBondIndexes):
+                self.rev = True
+                self.name += f"-{dbl_reversed_indices}-{IUPACmultipliers[doubleBondCount]}{self.satType[-3:]}"
             else:
-                d_len = doubleBondCount
-                self.name =  f"{self.parseObj['ChainLengthDenotation']}-{dblBondIndexes}-{IUPACmultipliers[d_len]}ene-{trplBondIndexes}-{IUPACmultipliers[_len]}{self.satType[-3:]}" #NOTE: Adding "ene" or "yne" to the name 
+                self.name += f"-{dblBondIndexes}-{IUPACmultipliers[doubleBondCount]}{self.satType[-3:]}"
 
+        if trplBondIndexes:
+
+            self.satType = "Alkyne"
+            trpl_reversed_indices = [len(bondsArr)-n for n in trplBondIndexes[::-1]]
+            trplBondIndexes = [ti+1 for ti in trplBondIndexes]
+
+            if dblBondIndexes: #deffo double bond 
+                if self.rev:
+                    self.name += f"-{trpl_reversed_indices}-{IUPACmultipliers[tripleBondCount]}{self.satType[-3:]}"
+                else:
+                    self.name += f"-{trplBondIndexes}-{IUPACmultipliers[tripleBondCount]}{self.satType[-3:]}"
+            else:
+                if sum(trpl_reversed_indices) <= sum(trplBondIndexes):
+                    self.rev = True
+                    self.name += f"-{trpl_reversed_indices}-{IUPACmultipliers[tripleBondCount]}{self.satType[-3:]}"
+                else:
+                    self.name += f"-{trplBondIndexes}-{IUPACmultipliers[tripleBondCount]}{self.satType[-3:]}"
+
+#####################################################################################################
+
+        chainDebugger.print(f"Parse Object: {self.parseObj}")
         return
 
 ##########################################################################################
@@ -259,10 +366,16 @@ class RegexParser:
             shouldCountH = True #In case of C only in a node
             _i = 0 #Hack-ish solution #NOTE: Incase of reversal errors check here
 
+            ######DBG: ISOLATION ZONE STARTS HERE ##################################
+
+
+            #HUH if node == '' 
             if node == '': #NOTE: for trailing bonds Ex: CH3=CH3= <- bad!
                 errCompound = ''
                 _kekw = errCompound.join(self.tokens).replace("SingleBond",TknBonds["SingleBond"]).replace("DoubleBond",TknBonds["DoubleBond"]).replace("TripleBond",TknBonds["TripleBond"]) #LMAOOOOO
-                return '',IllegalChainError(f"Chain cannot end with a trailing bond; -> '{_kekw}' ends with -> '{TknBonds[bondsArr[-1]]}'")
+                return '',IllegalChainError(f"Chain cannot end with a trailing bond; -> '{_kekw}' ends with -> '{TknBonds[bondsArr[-1]]}' In Carbon of position {ni+1}")
+
+            ######DBG: ISOLATION ZONE ENDS HERE ##################################
 
             #NOTE: Node follows: CHn or CH*n; 
             if node[0] != Tkn_Carbon:#Positional 
@@ -309,12 +422,10 @@ class RegexParser:
             nodeIsValid, msg = newNode.isValidNode()
 
             if nodeIsValid:
-                continue
+                parseResult["HydrogenCount"] += hydrogenCount
+                parseResult["Nodes"].append(newNode)
             else:
                 return '',IllegalNodeError(f"Node {newNode} is not a valid combination; {msg}")
-
-            parseResult["HydrogenCount"] += hydrogenCount
-            parseResult["Nodes"].append(newNode)
 
         ##############################################################################
 
@@ -329,8 +440,12 @@ class RegexParser:
         return rez.name, None 
 
 ##########################################################################################
-#Final Exported Method to interface (nm.py)
+#Final Exported Method to interface (nm.py) and internal run methods
 ##########################################################################################
+def passTokens(inputChain):
+    lxr = Lexer(inputChain)
+    tkns,_err = lxr.makeTokens()
+    return tkns,_err
 
 def runParser(inputChain,debugging=False):
 
@@ -347,45 +462,9 @@ def runParser(inputChain,debugging=False):
     prsr = RegexParser(tkns)
     prsr_res, prsr_err = prsr.evaluate()
 
+    chainDebugger.print(f"FROM PARSER: {inputChain}")
     if(prsr_err): return '', prsr_err
 
     return prsr_res, None
 
-##########################################################################################
-#Testing Functions
-##########################################################################################
-
-def test_ch(node):
-    Tkn_Hydrogen = "H"
-    hydrogenCount  = 0
-    hydrogenAtoms = node[1:] #Removing the Carbon nodes since its CHn | CH*n
-
-    for i in range(len(hydrogenAtoms)):
-        unit = hydrogenAtoms[i]
-        if unit==Tkn_Hydrogen:
-            hydrogenCount += 1
-        
-        if unit.isnumeric(): #NOTE: if an error comes wrt CANNOT INT this obj its from here
-            if int(unit):
-                hydrogenCount += int(unit) - 1
-
-    return hydrogenCount
-
-def test():
-    while 1:
-        inputChain = input(">>> ")
-        tkns,_err = passTokens(inputChain)
-        
-        if _err:
-            print(_err)
-            break
-        
-        prsr = RegexParser(tkns)
-        res, err = prsr.evaluate()
-
-        if(err):
-            print(_err)
-            break
-
-        print(res)
-    return
+##############################################################################################

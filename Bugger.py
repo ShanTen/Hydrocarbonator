@@ -2,6 +2,8 @@
 # Make-shift debug logger
 ##############################################################
 
+from huepy import orange as y
+
 class Bugger:
     def __init__(self,setState=None,notifyState=False):
         self.isActive = setState
@@ -9,7 +11,7 @@ class Bugger:
 
     def print(self, dbg_message):
         if self.isActive == True: 
-            print(f"DBG OUT: {dbg_message}")
+            print(y(f"DBG OUT: {dbg_message}"))
 
     def input(self,input_message, default_value=None):
         if self.isActive == False:
@@ -19,7 +21,7 @@ class Bugger:
 
     def log(self, dbg_message):
         if self.isActive == True: 
-            print(f"DBG OUT: {dbg_message}")
+            print(y(f"DBG OUT: {dbg_message}"))
 
     def activate(self):
         self.isActive = True
@@ -29,8 +31,8 @@ class Bugger:
 
     def notifyState(self):
         if self.isActive in [True, False]:
-            print(f"DBG STATE: {self.isActive}")
+            print(y(f"DBG STATE: {self.isActive}"))
             if self.isActive == False:
-                print(f"All debug variables have been set to default values")
+                print(y(f"All debug variables have been set to default values"))
         else:
-            print(f"Starting Debug State is undefined ({self.isActive}) which may not give desirable results.")
+            print(y(f"Starting Debug State is undefined ({self.isActive}) which may not give desirable results."))
