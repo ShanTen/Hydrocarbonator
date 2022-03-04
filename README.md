@@ -38,11 +38,13 @@ python nm.py
 + ~~*Simplify* Node Making~~
 + ~~Figure out hierarchy to get Cascading Unsaturation Naming~~
 + ~~regex-ify~~ 
-+ BUG [Critical]: Fix priority issues (Prioritizes alkynes over alkenes)
-+ Add Caching with a db
-+ Add Massive List of Examples
++ ~~BUG [Critical]: Fix priority issues~~
++ ~~Add Caching~~ (used bin file instead of db)
++ ~~Add Massive List of Examples~~
 
 ## Result:
 
 
-![](https://media.discordapp.net/attachments/752540780966576318/882978411256086538/unknown.png?width=1209&height=600)
+![](https://media.discordapp.net/attachments/752540780966576318/949371481438167090/unknown.png?width=1271&height=669)
+
+![](https://media.discordapp.net/attachments/752540780966576318/949373989187362896/unknown.png?width=1191&height=670)
