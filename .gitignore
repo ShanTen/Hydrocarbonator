@@ -8,4 +8,8 @@ todo
 /test
 .vscode
 *.bin
+PureHydrocarbons.py
+scV2Lexer.py
+singleChainv1.py
+singleChainv2.py
 Hydrocarbonator-Clone-Restored
