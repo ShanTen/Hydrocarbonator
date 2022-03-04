@@ -21,6 +21,7 @@ Welp ig I now know that Im going to be recreating a fully SMILE compatible forma
 Run it by first cloning the github repository, then running `nm.py`
 ```
 git clone https://github.com/ShanTen/Hydrocarbonator/
+cd Hydrocarbonator
 init.bat
 python nm.py
 ```
