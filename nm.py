@@ -109,7 +109,7 @@ def handleNonPNomen(cmdString):
 #Main
 ##########################################################################################
 
-cacheLocation = "./cache.bin" #Location of cache file (try not to change this)
+cacheLocation = "./cache.bin" #Location of cache file (try not to change this name or location)
 cacheDict = None
 changedCache = False
 
