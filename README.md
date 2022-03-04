@@ -44,6 +44,7 @@ python nm.py
 
 ## Result:
 
+Some screenshots from the application
 
 ![](https://media.discordapp.net/attachments/752540780966576318/949371481438167090/unknown.png?width=1271&height=669)
 
