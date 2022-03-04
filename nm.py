@@ -109,19 +109,20 @@ def handleNonPNomen(cmdString):
 #Main
 ##########################################################################################
 
+cacheLocation = "./cache.bin"
 cacheDict = None
 changedCache = False
 
 def updateCache(data): #Choice for updating after each cycle or at the end, Handle EoF errs
-	with open("./cache.bin",'rb+') as f:
+	with open(cacheLocation,'rb+') as f:
 		pic.dump(data,f)
 		f.flush();f.close()
 
 def resetCache():
-	global cacheDict, changedCache
+	global cacheDict, changedCache, cacheLocation
 	dec = input(hp.red("ARE YOU SURE YOU WANT TO RESET CACHE? (Y/N): ")).upper()
 	if dec in ["Y", "YES"] :
-		with open("./cache.bin",'rb+') as f:
+		with open(cacheLocation,'rb+') as f:
 			empSet = {"CH4":"Methane"}
 			pic.dump(empSet,f)
 			f.flush();f.close()
@@ -132,7 +133,7 @@ def resetCache():
 
 def readCache():
 	global cacheDict
-	with open("./cache.bin",'rb+') as f:
+	with open(cacheLocation,'rb+') as f:
 		cacheDict = pic.load(f)
 		f.close()
 
