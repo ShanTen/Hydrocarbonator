@@ -23,8 +23,9 @@ For Setup/Install
 ```
 git clone https://github.com/ShanTen/Hydrocarbonator/
 cd Hydrocarbonator
-init.bat
+init.bat 
 ```
+use init.sh for non windows.
 
 To Run it
 
