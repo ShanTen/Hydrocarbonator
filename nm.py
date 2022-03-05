@@ -14,6 +14,7 @@ from os import name as OSName
 
 import huepy as hp
 import pickle as pic
+from random import choice
 
 ##########################################################################################
 #Declrations
@@ -52,7 +53,8 @@ Use cmds or commands for the list of all commands available
 commands = ['cmds','commands','clear','cls',
 	'exit','quit','settings','config',
 	'help','?','dbg-toggle','dbg',
-	'show-cache',"display-cache","dc","clear-cache"]
+	'show-cache',"display-cache","dc",
+	"clear-cache"]
 
 ##########################################################################################
 #Command Handling Method Definition
@@ -110,6 +112,7 @@ def handleNonPNomen(cmdString):
 ##########################################################################################
 
 cacheLocation = "./cache.bin" #Location of cache file (try not to change this name or location)
+examplesLocation = "./examples.out" #Location for a file with examples
 cacheDict = None
 changedCache = False
 
@@ -137,7 +140,15 @@ def readCache():
 		cacheDict = pic.load(f)
 		f.close()
 
+def getExamples(fileLocation):
+	with open(fileLocation,'r') as f:
+		comps = f.read().split("\n")
+	return comps
+
 readCache()
+CompsExampleSet = getExamples(examplesLocation)
+
+randomFlag = False
 
 while 1:
 	try:
@@ -157,13 +168,17 @@ while 1:
 	elif ' \n' in text: #Handle Just Enter
 		continue
 
-	else:
+	else:			
 		comment=''
 		commentChar = NMSettings["CommentChar"]
 		condensedFormula=text
 		if commentChar in text: #Comment Handling
 			comment = text[text.index(commentChar)::]
 			condensedFormula = text[:text.index(commentChar)].strip() #Remove trailing spaces
+
+		if text in ["random","rand"]:
+			condensedFormula = choice(CompsExampleSet)
+			print(condensedFormula)
 
 		#we have built the unicode char '≡' to represent triple bonds in our parser
 		#however the unicode character is hard to type, but if the user managed to type it, it is ok
