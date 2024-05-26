@@ -55,6 +55,6 @@ python nm.py
 
 Some screenshots from the application
 
-![](https://media.discordapp.net/attachments/752540780966576318/949371481438167090/unknown.png?width=1271&height=669)
+![](https://raw.githubusercontent.com/ShanTen/staticHaver/master/nmSS01.png)
 
-![](https://media.discordapp.net/attachments/752540780966576318/949373989187362896/unknown.png?width=1191&height=670)
+![](https://raw.githubusercontent.com/ShanTen/staticHaver/master/nmSS02.png)
