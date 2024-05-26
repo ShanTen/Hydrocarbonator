@@ -3,7 +3,6 @@
 ##########################################################################################
 
 #from singleChainv2 import runNMEngine #NOTE: This is from Previous Version of Implemention and is not compatible with new version 
-from asyncore import read
 from singleChainRegexParser import runParser
 
 from Bugger import Bugger 
@@ -29,8 +28,6 @@ NMSettings = {
 	"UpdateCacheAfterEachRun":False, #Set to True if you want to update cache after every single run instead of during exit.
 	"Debugging":False #For NM engine, to debug nm.py use meta bugger.
 }
-
-
 
 HelpText = hp.cyan("""Type a condensed organic formula and press enter
  Use right case characters for elements for example C for carbon and H for Hydrogen
@@ -159,7 +156,7 @@ while 1:
 		print(hp.blue("Updated Cache if any changed were made."))
 		exit(hp.red(f"An EoF Error occurred due to either a bad input (empty input from file) or forced termination of program."))
 
-	if text in commands:
+	if text.strip().lower() in commands:
 		handleNonPNomen(text)
 
 	elif '\n' in text: #Handle Just Enter

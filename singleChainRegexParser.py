@@ -3,7 +3,7 @@ from Bugger import Bugger
 import re
 
 #################################################
-#Shantanu's Convention
+#Program Convention
 #NOTE: for notes
 #TODO: For inline features to add
 #################################################
@@ -130,7 +130,7 @@ class Lexer: #End Result should be TokenArr(If any) and Error (If Any)
         self.advance()
 
     def advance(self):
-        self.pos += 1
+        self.pos += 1 #basically the index
 
         if self.pos < len(self.chain):
             self.currentChar = self.chain[self.pos]
@@ -206,6 +206,7 @@ class NameClass:
 
         trplBondIndexes = get_indexes(bondsArr,"TripleBond")
         dblBondIndexes = get_indexes(bondsArr,"DoubleBond")
+
         doubleBondCount = len(dblBondIndexes)
         tripleBondCount = len(trplBondIndexes)
 
@@ -366,16 +367,10 @@ class RegexParser:
             shouldCountH = True #In case of C only in a node
             _i = 0 #Hack-ish solution #NOTE: Incase of reversal errors check here
 
-            ######DBG: ISOLATION ZONE STARTS HERE ##################################
-
-
-            #HUH if node == '' 
             if node == '': #NOTE: for trailing bonds Ex: CH3=CH3= <- bad!
                 errCompound = ''
                 _kekw = errCompound.join(self.tokens).replace("SingleBond",TknBonds["SingleBond"]).replace("DoubleBond",TknBonds["DoubleBond"]).replace("TripleBond",TknBonds["TripleBond"]) #LMAOOOOO
                 return '',IllegalChainError(f"Chain cannot end with a trailing bond; -> '{_kekw}' ends with -> '{TknBonds[bondsArr[-1]]}' In Carbon of position {ni+1}")
-
-            ######DBG: ISOLATION ZONE ENDS HERE ##################################
 
             #NOTE: Node follows: CHn or CH*n; 
             if node[0] != Tkn_Carbon:#Positional 
@@ -456,7 +451,8 @@ def runParser(inputChain,debugging=False):
 
     lxr = Lexer(inputChain)
     tkns,_err = lxr.makeTokens()
-    
+    print(tkns)
+
     if(_err): return [], _err
 
     prsr = RegexParser(tkns)
